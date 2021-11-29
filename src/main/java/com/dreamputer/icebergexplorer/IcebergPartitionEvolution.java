@@ -167,7 +167,7 @@ public class IcebergPartitionEvolution {
 
 
         // ============================================================================
-        // Partition Evolution: bucket (bucket[16], day, identity)
+        // Partition Evolution: (bucket(16, ...), days(...), identityCol, truncate(..., 5))
         // ============================================================================
         // CREATE TABLE TestBronzePartition AND INSERT DATA
         spark.sql("DROP TABLE IF EXISTS local.db.TestBronzePartition").show();
@@ -176,14 +176,14 @@ public class IcebergPartitionEvolution {
                 "Data string, " +
                 "Category string, " +
                 "ts timestamp) USING iceberg " +
-                "PARTITIONED BY (bucket(16, Id), days(ts), Category) " +
+                "PARTITIONED BY (bucket(16, Id), days(ts), Category, truncate(Data, 5)) " +
                 "TBLPROPERTIES('cloud-table.data-retention-sql'='delete * from {{tableName}} where partitionKeyColumn >= date_sub(CAST(current_timestamp() AS DATE), {{retentionDays}})')";
         spark.sql(createTestBronzePartitionSQL).show();
         String insertTestBronzePartitionSQL = "INSERT INTO local.db.TestBronzePartition VALUES " +
-                "(1, 'd1', 'c1', cast(unix_timestamp('2021-11-01 00:00:00', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
-                "(2, 'd1', 'c2', cast(unix_timestamp('2021-11-02 01:01:01', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
-                "(3, 'd1', 'c3', cast(unix_timestamp('2021-10-01 02:02:02', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
-                "(4, 'd1', 'c4', cast(unix_timestamp('2021-09-01 03:03:03', 'yyyy-MM-dd HH:mm:ss') as timestamp) )";
+                "(1, 'd12345',  'c1', cast(unix_timestamp('2021-11-01 00:00:00', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
+                "(2, 'd67890',  'c2', cast(unix_timestamp('2021-11-02 01:01:01', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
+                "(3, 'd111213', 'c3', cast(unix_timestamp('2021-10-01 02:02:02', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
+                "(4, 'd141516', 'c4', cast(unix_timestamp('2021-09-01 03:03:03', 'yyyy-MM-dd HH:mm:ss') as timestamp) )";
         spark.sql(insertTestBronzePartitionSQL).show();
 
         // LOAD ICEBERG TABLE
@@ -197,6 +197,7 @@ public class IcebergPartitionEvolution {
             // Id_bucket        bucket[16]
             // ts_day           day
             // Category         identity
+            // Data_trunc       truncate[5]
             if(field.name().startsWith("Id_bucket") && field.transform().toString().equals("bucket[16]")) {
                 partitionFieldToRemove = field.name();
             }
@@ -212,8 +213,15 @@ public class IcebergPartitionEvolution {
             // Id_bucket       void
             // ts_day          day
             // Category        identity
+            // Data_trunc      truncate[5]
             // Id_bucket_32    bucket[32]
         }
+
+        // data
+        //     Id_bucket=3
+        //         ts_day=2021-10-01
+        //             Category=c3
+        //                 Data_trunc=d1112
 
 
         // ============================================================================
