@@ -1,0 +1,34 @@
+### Build ###
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+*.class
+classes
+src/main/resources/META-INF/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### Spark ###
+metastore_db/
+spark-warehouse/
+*.log
+
+### MacOS ###
+.DS_Store
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
