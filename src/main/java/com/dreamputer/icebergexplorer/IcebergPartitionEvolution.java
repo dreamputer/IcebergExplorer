@@ -165,6 +165,23 @@ public class IcebergPartitionEvolution {
         // table.spec().fields().get(2).transform() instanceof Bucket;
         // table.spec().fields().get(table.spec().fields().size() - 1).transform().getClass().getName();  // org.apache.iceberg.transforms.Bucket$BucketString
 
+        // INSERT MORE RECORDS AFTER PARTITION EVOLUTION
+        table1.refresh();
+        spark = spark.cloneSession();
+        String insertTestBronzeBucketSQL2 = "INSERT INTO local.db.TestBronzeBucket VALUES " +
+                "(5, 'c5', cast(unix_timestamp('2021-11-05 00:00:00', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
+                "(6, 'c6', cast(unix_timestamp('2021-11-06 01:01:01', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
+                "(7, 'c7', cast(unix_timestamp('2021-12-07 02:02:02', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
+                "(8, 'c8', cast(unix_timestamp('2021-12-08 03:03:03', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
+                "(9, 'c9', cast(unix_timestamp('2021-12-09 00:00:00', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
+                "(10, 'c10', cast(unix_timestamp('2022-01-01 01:01:01', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
+                "(11, 'c11', cast(unix_timestamp('2022-01-01 02:02:02', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
+                "(12, 'c12', cast(unix_timestamp('2022-01-02 03:03:03', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
+                "(13, 'c13', cast(unix_timestamp('2022-01-03 00:00:00', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
+                "(14, 'c14', cast(unix_timestamp('2022-01-04 01:01:01', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
+                "(15, 'c15', cast(unix_timestamp('2022-01-01 02:02:02', 'yyyy-MM-dd HH:mm:ss') as timestamp) ), " +
+                "(16, 'c16', cast(unix_timestamp('2022-01-01 03:03:03', 'yyyy-MM-dd HH:mm:ss') as timestamp) )";
+        spark.sql(insertTestBronzeBucketSQL2).show();
 
         // ============================================================================
         // Partition Evolution: (bucket(16, ...), days(...), identityCol, truncate(..., 5))
