@@ -234,6 +234,50 @@ public class IcebergPartitionEvolution {
             // Id_bucket_32    bucket[32]
         }
 
+        // Revert to previous bucket size
+        System.out.println("Reverting to previous bucket size: ");
+        for(var field : table2.spec().fields()) {
+            if(field.name().startsWith("Id_bucket") && field.transform().toString().equals("bucket[32]")) {
+                partitionFieldToRemove = field.name();
+            }
+        }
+
+        table2.updateSpec()
+                .addField(bucket("Id", 16))
+                .removeField(partitionFieldToRemove)  // "Id_bucket"
+                .commit();
+        for(var field : table2.spec().fields()) {
+            System.out.println(field.name());
+            System.out.println(field.transform());
+            // Id_bucket       void
+            // ts_day          day
+            // Category        identity
+            // Id_bucket_32    bucket[32]
+        }
+
+        // Revert to previous bucket size, again
+        System.out.println("Reverting to previous bucket size again: ");
+        for(var field : table2.spec().fields()) {
+            if(field.name().startsWith("Id_bucket") && field.transform().toString().equals("bucket[16]")) {
+                partitionFieldToRemove = field.name();
+            }
+        }
+
+        table2.updateSpec()
+                .addField(bucket("Id", 32))
+                .removeField(partitionFieldToRemove)  // "Id_bucket"
+                .commit();
+        for(var field : table2.spec().fields()) {
+            System.out.println(field.name());
+            System.out.println(field.transform());
+            // Id_bucket            void
+            // ts_day               day
+            // Category             identity
+            // Id_bucket_32_1003    void
+            // Id_bucket_16         void
+            // Id_bucket_32         bucket[32]
+        }
+
         // data
         //     Id_bucket=3
         //         ts_day=2021-10-01
